@@ -17,7 +17,7 @@ class dates_generator: #list of dates in question in callable format for coinpap
             start += step
         print('success')
         return date_list
-dates = dates_generator().dates('20101001','20200509') #call class instance & function 
+dates = dates_generator().dates('20101001','20200512') #call class instance & function 
 
 class data_generator: #list of data - change to numpy for better usability
     def __init__(self):
