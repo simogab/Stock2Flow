@@ -1,5 +1,7 @@
 import datetime
 import numpy as np
+import matplotlib.pyplot as plt
+import cpi
 import pickle #getting data from .txt
 with open('data_coinpaprika_btc.txt','rb') as fp: 
     data = pickle.load(fp)
@@ -17,7 +19,8 @@ class extractor(): #extracting from data the relevant points
             m_cap.append(self.data[i][0]['market_cap'])
         return p,t,m_cap
 p,t,m_cap = extractor(data).mlist() #storin price, timestamp & marketcap as lists
-t_yr = list(map(str,[string[:10] for string in t])) #more formatting for timestamp 
+t_yr = list(map(str,[string[:10] for string in t])) #more formatting for timestamp
+t_yr_inflation = list(map(str,[string[:4] for string in t])) 
 
 def dates(start_date,end_date): #extend t_yr into the future, code from data_coinpaprika.py
     start = datetime.datetime.strptime(start_date,'%Y%m%d')
@@ -78,12 +81,16 @@ def S_F(dates):
     return S,F
 S,F = S_F(t_yr_final)
 S2F = np.array(S)/np.array(F) 
-S2F_model = 0.4 * S2F **3 #model idea BTC price = x*S2F**n
+S2F_model = 0.4 * S2F **3 #model idea BTC price = x*S2F**n, todo: find regression to S2F_model
 
-#plotting
-import matplotlib.pyplot as plt 
-plt.yscale('log')
+def inflate(p,t): #adjust price for inflation 
+    p_inflate = []
+    for i in range(len(p)):
+        inflated = cpi.inflate(p[i],int(t[i]),to=2019) #unfortunatly no data past 2019?
+        p_inflate.append(inflated)
+    return p_inflate
+p_inflated = inflate(p[0:-165],t_yr_inflation[0:-165])
+
+plt.yscale('log') #plotting
 plt.plot(t_yr,p,S2F_model)
 plt.show()
-
-#adjust price for inflation & find regression to S2F_model
